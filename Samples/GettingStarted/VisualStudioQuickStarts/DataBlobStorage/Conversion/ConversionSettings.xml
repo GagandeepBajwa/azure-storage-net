@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<ConversionSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <PatchLength>48</PatchLength>
+  <PatchLengthOffset>12</PatchLengthOffset>
+  <PatchWidth>48</PatchWidth>
+  <PatchWidthOffset>12</PatchWidthOffset>
+  <PatchResolution>50</PatchResolution>
+  <EvaluationSet>8F3AEA67F7853A0EB022A735645DDCA783389825</EvaluationSet>
+</ConversionSettings>

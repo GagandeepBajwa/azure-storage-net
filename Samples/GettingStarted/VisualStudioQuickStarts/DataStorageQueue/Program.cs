@@ -91,7 +91,7 @@ namespace DataStorageQueueSample
         private static async Task<CloudQueue> CreateQueueAsync()
         {
             // Retrieve storage account information from connection string.
-            CloudStorageAccount storageAccount = CreateStorageAccountFromConnectionString(CloudConfigurationManager.GetSetting("StorageConnectionString"));
+            CloudStorageAccount storageAccount = CreateStorageAccountFromConnectionString("StorageConnectionString");
 
             // Create a queue client for interacting with the queue service
             CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();

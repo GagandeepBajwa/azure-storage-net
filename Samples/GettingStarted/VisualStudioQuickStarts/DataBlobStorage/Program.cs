@@ -21,10 +21,12 @@ namespace DataBlobStorageSample
     using Microsoft.WindowsAzure.Storage.Blob;
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    
+    using System.Windows.Forms;
+
     /// <summary>
     /// Azure Storage Blob Sample - Demonstrate how to use the Blob Storage service. 
     /// Blob storage stores unstructured data such as text, binary data, documents or media files. 
@@ -63,9 +65,23 @@ namespace DataBlobStorageSample
         //      3. Set breakpoints and run the project using F10. 
         // 
         // *************************************************************************************************************************
+
+
+        //connection string for the emulator cloud storage
+       public static string connectionString = "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1; AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;";
+
+
+
+
         static void Main(string[] args)
         {
             Console.WriteLine("Azure Storage Blob Sample\n ");
+
+            Console.WriteLine("");
+
+
+
+
 
             // Block blob basics
             Console.WriteLine("Block Blob Sample");
@@ -87,10 +103,17 @@ namespace DataBlobStorageSample
         {
             const string ImageToUpload = "HelloWorld.png";
 
+
+            //
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+
+
+
             // Retrieve storage account information from connection string
             // How to create a storage connection string - http://msdn.microsoft.com/en-us/library/azure/ee758697.aspx
-            CloudStorageAccount storageAccount = CreateStorageAccountFromConnectionString(CloudConfigurationManager.GetSetting("StorageConnectionString"));
-
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings.Get("StorageConnectionString"));
+            MessageBox.Show(ConfigurationManager.AppSettings.Get("StorageConnectionString"));
             // Create a blob client for interacting with the blob service.
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
 
@@ -153,7 +176,7 @@ namespace DataBlobStorageSample
 
             // Retrieve storage account information from connection string
             // How to create a storage connection string - http://msdn.microsoft.com/en-us/library/azure/ee758697.aspx
-            CloudStorageAccount storageAccount = CreateStorageAccountFromConnectionString(CloudConfigurationManager.GetSetting("StorageConnectionString"));
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings.Get("StorageConnectionString"));
 
             // Create a blob client for interacting with the blob service.
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
@@ -206,34 +229,86 @@ namespace DataBlobStorageSample
             //await container.DeleteAsync();
         }
 
-        /// <summary>
-        /// Validates the connection string information in app.config and throws an exception if it looks like 
-        /// the user hasn't updated this to valid values. 
+
+        ///<summary>
+        ///
+        /// Setting and Retrive Metadata
+        /// 
+        /// 
         /// </summary>
-        /// <param name="storageConnectionString">The storage connection string</param>
-        /// <returns>CloudStorageAccount object</returns>
-        private static CloudStorageAccount CreateStorageAccountFromConnectionString(string storageConnectionString)
+        public static async Task AddContainerMetadataAsync(CloudBlobContainer container)
         {
-            CloudStorageAccount storageAccount;
             try
             {
-                storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+                //Adding some metadata to the container
+                container.Metadata.Add("docType", "textDocumnets");
+                container.Metadata["category"] = "guidance";
+
+                //set the container's metadata
+                await container.SetMetadataAsync();
             }
-            catch (FormatException)
+            catch (StorageException e)
             {
-                Console.WriteLine("Invalid storage account information provided. Please confirm the AccountName and AccountKey are valid in the app.config file - then restart the sample.");
-                Console.ReadLine(); 
-                throw;
-            }
-            catch (ArgumentException)
-            {
-                Console.WriteLine("Invalid storage account information provided. Please confirm the AccountName and AccountKey are valid in the app.config file - then restart the sample.");
-                Console.ReadLine();
-                throw;
+                
+
             }
 
-            return storageAccount;
         }
 
+
+        ///<summary>
+        ///To Retreive the metadata
+        /// </summary>
+        public static async Task ReadContainerMetadataAsync(CloudBlobContainer container)
+        {
+            try {
+
+                await container.FetchAttributesAsync();
+
+                Console.WriteLine("Container Metadata");
+
+                foreach(var metaData in container.Metadata)
+                {
+                    Console.WriteLine("key:  " + metaData.Key);
+                    Console.WriteLine("value:  " + metaData.Value);
+
+                }
+
+
+            }
+            catch(StorageException e)
+            {
+
+
+            }
+
+
+        }
+
+
+        ///<summary>
+        ///All the container properties, general properties likes storage uri, last modified
+        /// </summary>
+        private static async Task ReadContainerPropertiesAsync(CloudBlobContainer container)
+        {
+            try
+            {
+                // Fetch some container properties and write out their values.
+                await container.FetchAttributesAsync();
+                Console.WriteLine("Properties for container {0}", container.StorageUri.PrimaryUri);
+                Console.WriteLine("Last modified time in UTC: {0}", container.Properties.LastModified);
+            }
+            catch (StorageException e)
+            {
+                Console.WriteLine(e.Message);
+                Console.ReadLine();
+            }
+        }
+
+
+
+
+
+
+        }
     }
-}

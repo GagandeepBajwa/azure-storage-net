@@ -73,7 +73,7 @@ namespace DataFileStorageSample
 
             // Retrieve storage account information from connection string
             // How to create a storage connection string - http://msdn.microsoft.com/en-us/library/azure/ee758697.aspx
-            CloudStorageAccount storageAccount = CreateStorageAccountFromConnectionString(CloudConfigurationManager.GetSetting("StorageConnectionString"));
+            CloudStorageAccount storageAccount = CreateStorageAccountFromConnectionString("StorageConnectionString");
 
             // Create a file client for interacting with the file service.
             CloudFileClient fileClient = storageAccount.CreateCloudFileClient();
