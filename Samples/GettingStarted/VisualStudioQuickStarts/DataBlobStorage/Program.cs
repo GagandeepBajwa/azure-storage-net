@@ -77,23 +77,74 @@ namespace DataBlobStorageSample
         {
             Console.WriteLine("Azure Storage Blob Sample\n ");
 
-            Console.WriteLine("");
+            Console.WriteLine("Select your choice\n");
+
+            Console.WriteLine("1. Upload data to the cloud Blob Storage");
+            Console.WriteLine("2. List all the Blobs");
+            Console.WriteLine("3. Download Blobs\n \n");
+
+            int choice = -1;
 
 
+            switch (choice)
+            {
+                case 1:
+                    UploadData();
+                    break;
 
+                case 2:
 
+                    break;
 
-            // Block blob basics
-            Console.WriteLine("Block Blob Sample");
-            BasicStorageBlockBlobOperationsAsync().Wait();
+                case 3:
 
-            // Page blob basics
-            Console.WriteLine("\nPage Blob Sample");
-            BasicStoragePageBlobOperationsAsync().Wait();
+                    break;
+
+            }
+
 
             Console.WriteLine("Press any key to exit");
             Console.ReadLine();
         }
+
+
+        ///<summary>
+        ///Entry point function for the evrything related to uploding data
+        /// </summary>
+        private static void UploadData()
+        {
+            Console.WriteLine("Enter your Choice! (Like 1, 2) \n");
+
+            Console.WriteLine("1.Upload Data as the BlockBlob");
+            Console.WriteLine("2. Upload Data as the Page Blob");
+
+            int choice = -1;
+
+
+            switch (choice)
+            {
+                case 1:
+                    BasicStorageBlockBlobOperationsAsync().Wait();
+                    break;
+
+                case 2:
+
+                    break;
+
+            }
+
+
+
+
+
+        }
+
+
+
+
+
+
+
 
         /// <summary>
         /// Basic operations to work with block blobs
@@ -113,7 +164,7 @@ namespace DataBlobStorageSample
             // Retrieve storage account information from connection string
             // How to create a storage connection string - http://msdn.microsoft.com/en-us/library/azure/ee758697.aspx
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings.Get("StorageConnectionString"));
-            MessageBox.Show(ConfigurationManager.AppSettings.Get("StorageConnectionString"));
+       
             // Create a blob client for interacting with the blob service.
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
 
