@@ -24,6 +24,7 @@ namespace DataBlobStorageSample
     using System.Configuration;
     using System.IO;
     using System.Linq;
+    using System.Security;
     using System.Threading.Tasks;
     using System.Windows.Forms;
 
@@ -72,39 +73,51 @@ namespace DataBlobStorageSample
 
 
 
-
+        [STAThread]
         static void Main(string[] args)
         {
-            Console.WriteLine("Azure Storage Blob Sample\n ");
+            int run = 0;
 
-            Console.WriteLine("Select your choice\n");
-
-            Console.WriteLine("1. Upload data to the cloud Blob Storage");
-            Console.WriteLine("2. List all the Blobs");
-            Console.WriteLine("3. Download Blobs\n \n");
-
-            int choice = -1;
-
-
-            switch (choice)
+            while (run == 0)
             {
-                case 1:
-                    UploadData();
+
+
+                Console.WriteLine("Azure Storage Blob Sample\n ");
+
+                Console.WriteLine("Select your choice\n");
+
+                Console.WriteLine("1. Upload data to the cloud Blob Storage");
+                Console.WriteLine("2. List all the Blobs");
+                Console.WriteLine("3. Download Blobs\n \n");
+                Console.WriteLine("Enter 0 to exit");
+
+                int choice = -1;
+
+                //Take the input
+                choice = Int32.Parse(Console.ReadLine());
+
+                switch (choice)
+                {
+                    case 1:
+                        UploadData();
+                        break;
+
+                    case 2:
+
+                        break;
+
+                    case 3:
+
+                        break;
+
+                }
+
+                if (choice == 0)
+                {
+                    //break out of the apps infinite loop
                     break;
-
-                case 2:
-
-                    break;
-
-                case 3:
-
-                    break;
-
+                }                
             }
-
-
-            Console.WriteLine("Press any key to exit");
-            Console.ReadLine();
         }
 
 
@@ -113,13 +126,15 @@ namespace DataBlobStorageSample
         /// </summary>
         private static void UploadData()
         {
-            Console.WriteLine("Enter your Choice! (Like 1, 2) \n");
+            Console.WriteLine("Enter your Choice! (Like 1, 2) \n\n");
 
             Console.WriteLine("1.Upload Data as the BlockBlob");
-            Console.WriteLine("2. Upload Data as the Page Blob");
+            Console.WriteLine("2. Upload Data as the Page Blob\n\n");
 
             int choice = -1;
 
+            //Take the input
+            choice = Int32.Parse(Console.ReadLine());
 
             switch (choice)
             {
@@ -132,10 +147,6 @@ namespace DataBlobStorageSample
                     break;
 
             }
-
-
-
-
 
         }
 
@@ -152,14 +163,25 @@ namespace DataBlobStorageSample
         /// <returns>Task<returns>
         private static async Task BasicStorageBlockBlobOperationsAsync()
         {
+            //Testing image for the cloud bliob storage
             const string ImageToUpload = "HelloWorld.png";
 
+            string[] FileNamesToUpload = null;
 
-            //
+            //Choose the files to be uploaded
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
-
-
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                try
+                {
+                     FileNamesToUpload = openFileDialog.FileNames;
+                }
+                catch(SecurityException e)
+                {
+                    MessageBox.Show(e.ToString());
+                }
+            }
 
             // Retrieve storage account information from connection string
             // How to create a storage connection string - http://msdn.microsoft.com/en-us/library/azure/ee758697.aspx
@@ -168,8 +190,11 @@ namespace DataBlobStorageSample
             // Create a blob client for interacting with the blob service.
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
 
+
+            Console.WriteLine("Processing your inputs");
+
             // Create a container for organizing blobs within the storage account.
-            Console.WriteLine("1. Creating Container");
+            Console.WriteLine("\n 1. Creating Container");
             CloudBlobContainer container = blobClient.GetContainerReference("democontainerblockblob");
             try
             {
@@ -190,25 +215,83 @@ namespace DataBlobStorageSample
 
             // Upload a BlockBlob to the newly created container
             Console.WriteLine("2. Uploading BlockBlob");
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(ImageToUpload);
-            await blockBlob.UploadFromFileAsync(ImageToUpload, FileMode.Open);
-
-            // List all the blobs in the container 
-            Console.WriteLine("3. List Blobs in Container");
-            foreach (IListBlobItem blob in container.ListBlobs())
+            CloudBlockBlob blockBlob = null;
+            foreach (string file in FileNamesToUpload)
             {
-                // Blob type will be CloudBlockBlob, CloudPageBlob or CloudBlobDirectory
-                // Use blob.GetType() and cast to appropriate type to gain access to properties specific to each type
-                Console.WriteLine("- {0} (type: {1})", blob.Uri, blob.GetType());
+                blockBlob = container.GetBlockBlobReference(file);
+                await blockBlob.UploadFromFileAsync(file, FileMode.Open);
             }
 
-            // Download a blob to your file system
-            Console.WriteLine("4. Download Blob from {0}", blockBlob.Uri.AbsoluteUri);
-            await blockBlob.DownloadToFileAsync(string.Format("./CopyOf{0}", ImageToUpload), FileMode.Create);
+
+            //All the possible operations on the Blocklob
+            Console.WriteLine("\n Type Your Choice");
+            Console.WriteLine("1. List all the blobs");
+            Console.WriteLine("2. Download the Blob");
+            Console.WriteLine("3. Delete the Blob");
+
+
+            int blobChoice = -1;
+            blobChoice = Int32.Parse(Console.ReadLine());
+            switch (blobChoice)
+            {
+                case 1:
+                    Console.WriteLine("Listing Blobs in Container");
+                    foreach (IListBlobItem blob in container.ListBlobs())
+                    {
+                        // Blob type will be CloudBlockBlob, CloudPageBlob or CloudBlobDirectory
+                        // Use blob.GetType() and cast to appropriate type to gain access to properties specific to each type
+                        Console.WriteLine("- {0} (type: {1})", blob.Uri, blob.GetType());
+                    }
+                    break;
+
+                case 2:
+                    Console.WriteLine("Listing Blobs in Container for download");
+                    int index = 1;
+                    foreach (IListBlobItem blob in container.ListBlobs())
+                    {
+                        // Blob type will be CloudBlockBlob, CloudPageBlob or CloudBlobDirectory
+                        // Use blob.GetType() and cast to appropriate type to gain access to properties specific to each type
+                        Console.WriteLine(index+". " + "- {0}   (type: {1})", blob.Uri, blob.GetType());
+
+                    }
+
+                    Console.WriteLine("Enter your slection");
+                    int downloadChoice = -1;
+                    downloadChoice = Int32.Parse(Console.ReadLine());
+
+
+                    Console.WriteLine("Your Download in progress");
+
+                    await blockBlob.DownloadToFileAsync(string.Format("./CopyOf{0}", FileNamesToUpload[downloadChoice] ), FileMode.Create);
+                    break;
+
+
+                case 3:
+                    Console.WriteLine("Listing Blobs in Container to delete");
+                    int deleteIndex = 1;
+                    foreach (IListBlobItem blob in container.ListBlobs())
+                    {
+                        // Blob type will be CloudBlockBlob, CloudPageBlob or CloudBlobDirectory
+                        // Use blob.GetType() and cast to appropriate type to gain access to properties specific to each type
+                        Console.WriteLine(deleteIndex + ". " + "- {0}   (type: {1})", blob.Uri, blob.GetType());
+
+                    }
+
+                    Console.WriteLine("Enter your slection");
+                    int deleteChoice = -1;
+                    deleteChoice = Int32.Parse(Console.ReadLine());
+
+                    Console.WriteLine("Deletion in progress");
+                    await blockBlob.DeleteAsync();
+
+
+                    break;
+            }
+
+ 
 
             // Clean up after the demo 
-            Console.WriteLine("5. Delete block Blob");
-            await blockBlob.DeleteAsync();
+           
 
             // When you delete a container it could take several seconds before you can recreate a container with the same
             // name - hence to enable you to run the demo in quick succession the container is not deleted. If you want 
